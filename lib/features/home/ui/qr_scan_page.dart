@@ -6,7 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import 'package:test_geolocator_android/core/routes/routes.dart';
 import 'package:test_geolocator_android/features/home/logic/qr_scan_cubit/qr_scan_cubit.dart';
-import 'package:test_geolocator_android/features/home/ui/widgets/home_page.dart';
+import 'package:test_geolocator_android/features/home/ui/home_page_o.dart';
 
 class QRSearchOrderPage extends StatefulWidget {
   const QRSearchOrderPage({super.key});
@@ -150,6 +150,9 @@ class _QRSearchOrderPageState extends State<QRSearchOrderPage> {
       key: qrKey,
       onQRViewCreated: (QRViewController controller) async {
         controller.scannedDataStream.listen((scanData) {
+          print(scanData.code);
+          log('scannedDataStream');
+          log(scanData.code.toString());
           // context.read<QrScanBloc>().add(const PauseResumeCamera());
           context.read<QrScanCubit>().barcodeDetected(scanData);
         });

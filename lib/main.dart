@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
       useInheritedMediaQuery: false,
       builder: (context, child) {
         return MaterialApp(
-          initialRoute: Routes.homePage,
+          initialRoute: Routes.homeScreen,
           debugShowCheckedModeBanner: false,
           title: 'Route Optimizer',
           theme: AppTheme.appTeme,

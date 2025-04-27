@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:test_geolocator_android/features/home/data/address.dart';
@@ -38,19 +40,20 @@ class DatabaseHelper {
     await db.execute('''
     CREATE TABLE addresses (
       id TEXT PRIMARY KEY,
-      file_id INTEGER,
+      file_id INTEGER REFERENCES address_files(id) ON DELETE SET NULL,
       order_id TEXT,
       building_number TEXT,
       street TEXT,
       district TEXT,
       postal_code TEXT,
       city TEXT,
+      is_done INTEGER NOT NULL DEFAULT 0 CHECK(is_done IN (0, 1)),
       region TEXT,
       country TEXT,
       full_address TEXT,
       lat REAL,
       lng REAL,
-      status TEXT CHECK(status IN ('pending', 'delivered', 'cancelled')),
+      status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending', 'delivered', 'cancelled')),
       scan_timestamp INTEGER,  
       FOREIGN KEY (file_id) REFERENCES address_files (id)
     )
@@ -71,6 +74,8 @@ class DatabaseHelper {
   // Address File operations
   Future<int> createAddressFile(AddressFile file) async {
     final db = await database;
+    log(file.toMap().toString());
+
     return await db.insert('address_files', file.toMap());
   }
 
@@ -105,30 +110,15 @@ class DatabaseHelper {
   }
 
   // Address operations
-  Future<int> insertAddress(Address address, int fileId) async {
+  Future<void> insertAddress(Address addresses) async {
     final db = await database;
 
-    return await db.insert('addresses', {
-      'id': address.id,
-      'file_id': fileId,
-      'order_id': address.orderId,
-      'building_number': address.addressDetails.buildingNumber,
-      'street': address.addressDetails.street,
-      'district': address.addressDetails.district,
-      'postal_code': address.addressDetails.postalCode,
-      'city': address.addressDetails.city,
-      'region': address.addressDetails.region,
-      'country': address.addressDetails.country,
-      'full_address': address.addressDetails.fullAddress,
-      'lat': address.coordinates.lat,
-      'lng': address.coordinates.lng,
-      'status': address.status,
-      'scan_timestamp':
-          DateTime.parse(
-            address.scanTimestamp.toIso8601String(),
-          ).millisecondsSinceEpoch ~/
-          1000,
-    });
+    await db.insert(
+      'addresses',
+      addresses.toMap(),
+      conflictAlgorithm:
+          ConflictAlgorithm.replace, // يستبدل البيانات إذا كان ID موجوداً
+    );
   }
 
   Future<List<Address>> getAddressesForFile(int fileId) async {
@@ -138,7 +128,7 @@ class DatabaseHelper {
       where: 'file_id = ?',
       whereArgs: [fileId],
     );
-    return List.generate(maps.length, (i) => Address.fromJson(maps[i]));
+    return List.generate(maps.length, (i) => Address.fromMap(maps[i]));
   }
 
   Future<Address?> getAddressById(String id) async {
@@ -147,26 +137,24 @@ class DatabaseHelper {
 
     if (maps.isNotEmpty) {
       return Address(
-        id: maps.first['id'] as String,
-        orderId: maps.first['order_id'] as String,
-        addressDetails: AddressDetails(
-          buildingNumber: maps.first['building_number'] as String,
-          street: maps.first['street'] as String,
-          district: maps.first['district'] as String,
-          postalCode: maps.first['postal_code'] as String,
-          city: maps.first['city'] as String,
-          region: maps.first['region'] as String,
-          country: maps.first['country'] as String,
-          fullAddress: maps.first['full_address'] as String,
-        ),
-        coordinates: Coordinates(
-          lat: maps.first['lat'] as double,
-          lng: maps.first['lng'] as double,
-        ),
+        isDone: maps.first['isDone'] == 1 ? true : false,
+        fileId: maps.first['file_id'] as int,
+        buildingNumber: maps.first['building_number'] as String,
+        street: maps.first['street'] as String,
+        district: maps.first['district'] as String,
+        postalCode: maps.first['postal_code'] as String,
+        city: maps.first['city'] as String,
+        region: maps.first['region'] as String,
+        country: maps.first['country'] as String,
+        fullAddress: maps.first['full_address'] as String,
+        lat: maps.first['lat'] as double,
+        lng: maps.first['lng'] as double,
         status: maps.first['status'] as String,
         scanTimestamp: DateTime.fromMillisecondsSinceEpoch(
           (maps.first['scan_timestamp'] as int) * 1000,
         ),
+        id: maps.first['id'] as String,
+        orderId: maps.first['order_id'] as String,
       );
     }
     return null;
@@ -183,26 +171,25 @@ class DatabaseHelper {
 
     return List.generate(maps.length, (i) {
       return Address(
+        fileId: fileId,
         id: maps[i]['id'] as String,
-        orderId: maps[i]['order_id'] as String,
-        addressDetails: AddressDetails(
-          buildingNumber: maps[i]['building_number'] as String,
-          street: maps[i]['street'] as String,
-          district: maps[i]['district'] as String,
-          postalCode: maps[i]['postal_code'] as String,
-          city: maps[i]['city'] as String,
-          region: maps[i]['region'] as String,
-          country: maps[i]['country'] as String,
-          fullAddress: maps[i]['full_address'] as String,
-        ),
-        coordinates: Coordinates(
-          lat: maps[i]['lat'] as double,
-          lng: maps[i]['lng'] as double,
-        ),
+        isDone: maps[i]['isDone'] == 1 ? true : false,
+        buildingNumber: maps[i]['building_number'] as String,
+        street: maps[i]['street'] as String,
+        district: maps[i]['district'] as String,
+        postalCode: maps[i]['postal_code'] as String,
+        city: maps[i]['city'] as String,
+        region: maps[i]['region'] as String,
+        country: maps[i]['country'] as String,
+        fullAddress: maps[i]['full_address'] as String,
+        lat: maps[i]['lat'] as double,
+        lng: maps[i]['lng'] as double,
         status: maps[i]['status'] as String,
         scanTimestamp: DateTime.fromMillisecondsSinceEpoch(
           (maps[i]['scan_timestamp'] as int) * 1000,
         ),
+
+        orderId: maps[i]['order_id'] as String,
       );
     });
   }

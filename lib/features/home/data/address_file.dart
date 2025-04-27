@@ -15,7 +15,11 @@ class AddressFile extends Equatable {
   });
 
   Map<String, dynamic> toMap() {
-    return {'id': id, 'date': date.toIso8601String(), 'name': name};
+    return {
+      'id': id,
+      'date': date.toIso8601String().toString(),
+      'name': name.toString(),
+    };
   }
 
   factory AddressFile.fromMap(Map<String, dynamic> map) {

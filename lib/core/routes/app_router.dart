@@ -8,7 +8,7 @@ import 'package:test_geolocator_android/features/home/logic/address_bloc.dart';
 import 'package:test_geolocator_android/features/home/logic/qr_scan_cubit/qr_scan_cubit.dart';
 import 'package:test_geolocator_android/features/home/ui/home_page_o.dart';
 import 'package:test_geolocator_android/features/home/ui/map_screen.dart';
-import 'package:test_geolocator_android/features/home/ui/widgets/home_page.dart';
+import 'package:test_geolocator_android/features/home/ui/file_address_page.dart';
 import 'package:test_geolocator_android/features/home/ui/widgets/scanner_page.dart';
 
 import '../../features/home/logic/bottom_navigation/bottom_navigation_cubit.dart';
@@ -17,12 +17,26 @@ import '../../features/home/ui/qr_scan_page.dart';
 class AppRouter {
   Route genratedRoute(RouteSettings settings) {
     switch (settings.name) {
-      case HomePage.routeName:
+      case Routes.homePage:
         return MaterialPageRoute(
           builder:
-              (context) => Provider<BottomNavigationCubit>(
-                create: (context) => BottomNavigationCubit(),
-                child: const HomePage(),
+              (context) => MultiProvider(
+                providers: [
+                  Provider<BottomNavigationCubit>(
+                    create: (_) => BottomNavigationCubit(),
+                  ),
+
+                  Provider<AddressBloc>(
+                    create:
+                        (_) =>
+                            AddressBloc(DatabaseHelper())
+                              ..add(ShowFiledAddressing((1))),
+                  ),
+                  Provider<QrScanCubit>(
+                    create: (_) => QrScanCubit()..initQrScan(),
+                  ),
+                ],
+                child: FilesAddressPage(),
               ),
         );
       // case LoginPage.routeName:
@@ -41,13 +55,13 @@ class AppRouter {
           // ),
         );
 
-      case Routes.homeScreen:
+      case Routes.fileAddressScreen:
         return CustomPageRoute(
           child: BlocProvider(
             create:
                 (context) =>
                     AddressBloc(DatabaseHelper())..add(LoadAddressFiles()),
-            child: const HomeScreen(),
+            child: const FilesAddressPage(),
           ),
           routeType: RouteType.slideAndScale,
           slideBeginOffset: const Offset(0.0, 1.0), // انزلاق من الأسفل
@@ -78,7 +92,8 @@ class AppRouter {
           child: BlocProvider(
             create:
                 (context) =>
-                    AddressBloc(DatabaseHelper())..add(LoadAddressFiles()),
+                    AddressBloc(DatabaseHelper())
+                      ..add(ShowFiledAddressing(settings.arguments as int)),
             child: MapScreen(fileId: settings.arguments as int),
           ),
           routeType: RouteType.slideAndScale,

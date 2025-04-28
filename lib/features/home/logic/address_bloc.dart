@@ -1,116 +1,13 @@
+import 'dart:developer';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:test_geolocator_android/features/home/data/address.dart';
 import 'package:test_geolocator_android/features/home/data/address_file.dart'
     show AddressFile;
 import 'package:test_geolocator_android/features/home/data/data_source/database_service.dart';
-
-// Events
-abstract class AddressEvent extends Equatable {
-  @override
-  List<Object> get props => [];
-}
-
-class LoadAddressFiles extends AddressEvent {}
-
-class CreateAddressFile extends AddressEvent {
-  final AddressFile file;
-
-  CreateAddressFile(this.file);
-
-  @override
-  List<Object> get props => [file];
-}
-
-class LoadAddressesForFile extends AddressEvent {
-  final int fileId;
-
-  LoadAddressesForFile(this.fileId);
-
-  @override
-  List<Object> get props => [fileId];
-}
-
-class AddAddress extends AddressEvent {
-  final Address address;
-  final int fileId;
-
-  AddAddress(this.address, this.fileId);
-
-  @override
-  List<Object> get props => [address, fileId];
-}
-
-class DeleteAddress extends AddressEvent {
-  final int id;
-
-  DeleteAddress(this.id);
-
-  @override
-  List<Object> get props => [id];
-}
-
-class DeleteAddressFile extends AddressEvent {
-  final int id;
-
-  DeleteAddressFile(this.id);
-
-  @override
-  List<Object> get props => [id];
-}
-
-class MarkAddressAsDone extends AddressEvent {
-  final int id;
-
-  MarkAddressAsDone(this.id);
-
-  @override
-  List<Object> get props => [id];
-}
-
-class UpdateAddressStatus extends AddressEvent {
-  final String addressId;
-  final String newStatus;
-
-  UpdateAddressStatus({required this.addressId, required this.newStatus});
-}
-
-// States
-abstract class AddressState extends Equatable {
-  @override
-  List<Object> get props => [];
-}
-
-class AddressInitial extends AddressState {}
-
-class AddressLoading extends AddressState {}
-
-class AddressFilesLoaded extends AddressState {
-  final List<AddressFile> files;
-
-  AddressFilesLoaded(this.files);
-
-  @override
-  List<Object> get props => [files];
-}
-
-class AddressFileLoaded extends AddressState {
-  final AddressFile file;
-
-  AddressFileLoaded(this.file);
-
-  @override
-  List<Object> get props => [file];
-}
-
-class AddressError extends AddressState {
-  final String message;
-
-  AddressError(this.message);
-
-  @override
-  List<Object> get props => [message];
-}
+part 'address_state.dart';
+part 'address_event.dart';
 
 // Bloc
 class AddressBloc extends Bloc<AddressEvent, AddressState> {
@@ -119,11 +16,11 @@ class AddressBloc extends Bloc<AddressEvent, AddressState> {
   AddressBloc(this._databaseHelper) : super(AddressInitial()) {
     on<LoadAddressFiles>(_onLoadAddressFiles);
     on<CreateAddressFile>(_onCreateAddressFile);
-    on<LoadAddressesForFile>(_onLoadAddressesForFile);
     on<AddAddress>(_onAddAddress);
     on<DeleteAddress>(_onDeleteAddress);
     on<DeleteAddressFile>(_onDeleteAddressFile);
     on<MarkAddressAsDone>(_onMarkAddressAsDone);
+    on<ShowFiledAddressing>(_showFiledAddressing);
   }
 
   Future<void> _onLoadAddressFiles(
@@ -132,14 +29,9 @@ class AddressBloc extends Bloc<AddressEvent, AddressState> {
   ) async {
     emit(AddressLoading());
 
-    final file = AddressFile(
-      date: DateTime.now(),
-      name: 'test',
-      addresses: [],
-      id: 1,
-    );
+    final files = await _databaseHelper.getAllAddressFiles();
+    emit(FilesLoaded(files));
 
-    emit(AddressFileLoaded(file));
     try {
       // emit(AddressFilesLoaded(files));
     } catch (e) {
@@ -152,32 +44,12 @@ class AddressBloc extends Bloc<AddressEvent, AddressState> {
     Emitter<AddressState> emit,
   ) async {
     try {
+      print('event files is  ${event.file.toMap()}');
       await _databaseHelper.createAddressFile(event.file);
       final files = await _databaseHelper.getAllAddressFiles();
-      emit(AddressFilesLoaded(files));
+      emit(FilesLoaded(files));
     } catch (e) {
-      emit(AddressError(e.toString()));
-    }
-  }
-
-  Future<void> _onLoadAddressesForFile(
-    LoadAddressesForFile event,
-    Emitter<AddressState> emit,
-  ) async {
-    emit(AddressLoading());
-    try {
-      final file = AddressFile(
-        date: DateTime.now(),
-        name: 'test',
-        addresses: [],
-        // id: 1,
-      );
-      if (file != null) {
-        emit(AddressFileLoaded(file));
-      } else {
-        emit(AddressError('Address file not found'));
-      }
-    } catch (e) {
+      print(' error when add file address  : $e');
       emit(AddressError(e.toString()));
     }
   }
@@ -187,17 +59,16 @@ class AddressBloc extends Bloc<AddressEvent, AddressState> {
     Emitter<AddressState> emit,
   ) async {
     try {
-      final file = AddressFile(
-        date: DateTime.now(),
-        name: 'test',
-        addresses: [],
-        // id: 1,
+      log('event is $event');
+      final address = event.address;
+      await _databaseHelper.insertAddress(
+        address.copyWith(fileId: event.fileId),
       );
-      if (file != null) {
-        emit(AddressFileLoaded(file));
-        // emit(AddressFileLoaded(file));
-      }
+      final files = await _databaseHelper.getAllAddressFiles();
+
+      emit(FilesLoaded(files));
     } catch (e) {
+      log('error is $e');
       emit(AddressError(e.toString()));
     }
   }
@@ -209,7 +80,7 @@ class AddressBloc extends Bloc<AddressEvent, AddressState> {
     try {
       await _databaseHelper.deleteAddress(event.id);
       final files = await _databaseHelper.getAllAddressFiles();
-      emit(AddressFilesLoaded(files));
+      emit(FilesLoaded(files));
     } catch (e) {
       emit(AddressError(e.toString()));
     }
@@ -222,7 +93,7 @@ class AddressBloc extends Bloc<AddressEvent, AddressState> {
     try {
       await _databaseHelper.deleteAddressFile(event.id);
       final files = await _databaseHelper.getAllAddressFiles();
-      emit(AddressFilesLoaded(files));
+      emit(FilesLoaded(files));
     } catch (e) {
       emit(AddressError(e.toString()));
     }
@@ -235,7 +106,21 @@ class AddressBloc extends Bloc<AddressEvent, AddressState> {
     try {
       await _databaseHelper.markAddressAsDone(event.id);
       final files = await _databaseHelper.getAllAddressFiles();
-      emit(AddressFilesLoaded(files));
+      emit(FilesLoaded(files));
+    } catch (e) {
+      emit(AddressError(e.toString()));
+    }
+  }
+
+  Future<void> _showFiledAddressing(
+    ShowFiledAddressing event,
+    Emitter<AddressState> emit,
+  ) async {
+    try {
+      emit(AddressLoading());
+      await _databaseHelper.getAddressesForFile(event.fileId).then((value) {
+        emit(AddressFileLoaded(value));
+      });
     } catch (e) {
       emit(AddressError(e.toString()));
     }

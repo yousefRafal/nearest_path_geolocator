@@ -18,11 +18,11 @@ class Address {
   final String country;
   final String fullAddress;
   final double lat;
-  final int fileId;
+  final int? fileId;
   final double lng;
 
   Address({
-    required this.fileId,
+    this.fileId,
     required this.id,
     required this.orderId,
     required this.status,
@@ -117,7 +117,7 @@ class Address {
 
     return Address(
       id: map['id'] as String,
-      fileId: map['file_id'] as int? ?? 0, // يسمح بقيمة null
+      fileId: map['file_id'] as int?, // يسمح بقيمة null
       orderId: map['order_id']?.toString() ?? '',
       status: status,
       scanTimestamp: DateTime.fromMillisecondsSinceEpoch(

@@ -4,31 +4,36 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:test_geolocator_android/core/theme/app_text.dart';
 
 class AppTheme {
-  static final Color _lightFocusColor = Colors.black.withOpacity(0.12);
+  static final Color _lightFocusColor = const Color.fromARGB(
+    255,
+    34,
+    81,
+    38,
+  ).withOpacity(0.12);
 
   static ColorScheme colorScheme = const ColorScheme(
-    primary: Color(0xFF4F46E5),
-    onPrimary: Colors.white,
-    secondary: Color(0xFF241E30),
-    onSecondary: Color(0xFFE6EBEB),
+    primary: Color.fromARGB(255, 93, 130, 101),
+    onPrimary: Color.fromARGB(255, 252, 252, 252),
+    secondary: Colors.black12,
+    onSecondary: Colors.white,
     error: Colors.redAccent,
-    inversePrimary: Color.fromARGB(255, 244, 247, 252),
-    onSecondaryContainer: Color(0xFFE6EBEB),
-    onTertiary: Color(0xFFE6EBEB),
-    onTertiaryContainer: Color(0xFFE6EBEB),
-    outline: Color(0xFFE6EBEB),
-    outlineVariant: Color(0xFFE6EBEB),
-    scrim: Color(0xFFE6EBEB),
-    shadow: Color(0xFFE6EBEB),
-    surfaceTint: Color(0xFFE6EBEB),
-    tertiary: Color(0xFFE6EBEB),
-    onSurfaceVariant: Color(0xFFE6EBEB),
+    inversePrimary: Color.fromARGB(255, 54, 131, 255),
+    onSecondaryContainer: Color(0xFF241E30),
+    onTertiary: Colors.white,
+    onTertiaryContainer: Color(0xFF241E30),
+    outline: Color(0xFF241E30),
+    outlineVariant: Color(0xFF241E30),
+    scrim: Color(0xFF241E30),
+    shadow: Color(0xFF241E30),
+    surfaceTint: Color(0xFF241E30),
+    tertiary: Colors.black12,
+    onSurfaceVariant: Color(0xFF241E30),
     onError: Colors.white,
-    background: Color(0xFF241E30),
-    onBackground: Colors.white,
-    surface: Color(0xFF241E30),
-    onSurface: Colors.white,
-    brightness: Brightness.dark,
+    background: Color.fromARGB(255, 233, 249, 232),
+    onBackground: Color(0xFF241E30),
+    surface: Color.fromARGB(146, 68, 154, 83),
+    onSurface: Color(0xFF241E30),
+    brightness: Brightness.light,
   );
 
   static ThemeData appTeme = themeData(colorScheme, _lightFocusColor);
@@ -36,18 +41,19 @@ class AppTheme {
     ColorScheme colorScheme,
     Color focusColor,
   ) => ThemeData(
+    fontFamily: 'FormaDJRDisplay',
     colorScheme: colorScheme,
-    primaryColor: colorScheme.inversePrimary,
-    canvasColor: colorScheme.surface,
-    scaffoldBackgroundColor: colorScheme.surface,
-    highlightColor: Colors.transparent,
-    focusColor: focusColor,
-    cardColor: colorScheme.surface,
-    dialogBackgroundColor: colorScheme.surface,
-    indicatorColor: colorScheme.secondary,
-    hoverColor: Colors.transparent,
-    splashColor: Colors.transparent,
-    disabledColor: colorScheme.onSurface.withOpacity(0.4),
+    // primaryColor: colorScheme.inversePrimary,
+    // canvasColor: colorScheme.surface,
+    // scaffoldBackgroundColor: colorScheme.surface,
+    // highlightColor: Colors.transparent,
+    // focusColor: focusColor,
+    // cardColor: colorScheme.surface,
+    // dialogBackgroundColor: colorScheme.surface,
+    // indicatorColor: colorScheme.secondary,
+    // hoverColor: Colors.transparent,
+    // splashColor: Colors.transparent,
+    // disabledColor: colorScheme.onSurface.withOpacity(0.4),
     //card
     cardTheme: CardTheme(
       color: colorScheme.surface,
@@ -59,13 +65,13 @@ class AppTheme {
       clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
     ),
-    buttonTheme: ButtonThemeData(
-      buttonColor: colorScheme.secondary,
-      textTheme: ButtonTextTheme.primary,
-      disabledColor: colorScheme.onSecondary.withOpacity(0.4),
-      padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 32.w),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
-    ),
+    // buttonTheme: ButtonThemeData(
+    //   buttonColor: colorScheme.onError,
+    //   textTheme: ButtonTextTheme.primary,
+    //   disabledColor: colorScheme.onSecondary.withOpacity(0.4),
+    //   padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 32.w),
+    //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30.0)),
+    // ),
     snackBarTheme: SnackBarThemeData(
       showCloseIcon: true,
       backgroundColor: colorScheme.onSecondary,
@@ -79,11 +85,24 @@ class AppTheme {
         color: colorScheme.primary,
       ),
     ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        overlayColor: colorScheme.surface,
+        side: BorderSide(color: colorScheme.primary, width: 2),
+
+        foregroundColor: colorScheme.onError,
+        padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 22.w),
+
+        backgroundColor: colorScheme.surface,
+      ),
+    ),
+
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: colorScheme.secondary,
       foregroundColor: colorScheme.onSecondary,
       disabledElevation: 0.0,
       elevation: 0.0,
+
       focusElevation: 0.0,
       hoverElevation: 0.0,
       highlightElevation: 0.0,
@@ -158,29 +177,38 @@ class AppTheme {
     ),
     //icon theme
     iconTheme: IconThemeData(
-      color: colorScheme.onPrimary,
+      color: colorScheme.primary,
       size: 24.sp,
       opacity: 0.8,
+
       weight: const Icon(Icons.add).weight,
     ),
-    //button style
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        elevation: 2.0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30.0.r),
-        ),
-        minimumSize: Size(double.infinity, 38.0.h),
-        shadowColor: colorScheme.shadow,
-        backgroundColor: colorScheme.primary,
-        disabledBackgroundColor: colorScheme.primary.withOpacity(0.4),
-        disabledForegroundColor: Colors.grey,
-        padding: EdgeInsets.symmetric(horizontal: 20.0.w, vertical: 16.0.h),
-        textStyle: AppTextStyles.bodyText.copyWith(
-          color: colorScheme.onPrimaryContainer,
-        ),
+    inputDecorationTheme: InputDecorationTheme(
+      labelStyle: AppTextStyles.labelMediumText.copyWith(
+        color: Colors.black.withOpacity(0.4),
+        fontWeight: FontWeight.bold,
+      ),
+      hintStyle: AppTextStyles.labelMediumText.copyWith(
+        color: Colors.grey,
+        fontStyle: FontStyle.italic,
+      ),
+      filled: true,
+      fillColor: Colors.white24,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: colorScheme.primary, width: 2),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.green, width: 2),
       ),
     ),
+
+    //button style
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         elevation: 2.0,
@@ -197,14 +225,16 @@ class AppTheme {
           borderRadius: BorderRadius.circular(10.0.r),
         ),
       ).copyWith(
-        backgroundColor: MaterialStateProperty.resolveWith<Color>((
-          Set<MaterialState> states,
+        backgroundColor: WidgetStateProperty.resolveWith<Color>((
+          Set<WidgetState> states,
         ) {
-          if (states.contains(MaterialState.pressed))
+          if (states.contains(WidgetState.pressed)) {
+            // ignore: deprecated_member_use
             return colorScheme.primary.withOpacity(0.5);
+          }
           return colorScheme.surface; // Default Color
         }),
-        overlayColor: MaterialStateProperty.all(
+        overlayColor: WidgetStateProperty.all(
           colorScheme.primary.withOpacity(0.1),
         ), // Ripple color
         animationDuration: Duration(milliseconds: 200),
@@ -212,19 +242,29 @@ class AppTheme {
     ),
 
     appBarTheme: AppBarTheme(
-      actionsIconTheme: IconThemeData(color: colorScheme.onPrimary),
-      iconTheme: IconThemeData(
+      foregroundColor: colorScheme.onPrimary,
+      titleSpacing: 30,
+      titleTextStyle: AppTextStyles.headerMedium.copyWith(
         color: colorScheme.onPrimary,
+      ),
+      actionsIconTheme: IconThemeData(color: colorScheme.primary),
+      iconTheme: IconThemeData(
+        applyTextScaling: true,
+        color: colorScheme.primary,
         size: 24.sp,
         opacity: 0.8.sp,
         weight: const Icon(Icons.add).weight,
       ),
       shadowColor: Colors.transparent,
       elevation: 0.0,
+      // backgroundColor: colorScheme.surface,
+      surfaceTintColor: Colors.red,
       centerTitle: true,
-      color: colorScheme.secondary,
+
+      actionsPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
+      color: colorScheme.surface,
       systemOverlayStyle: SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
+        statusBarColor: colorScheme.surface.withOpacity(0.10),
         statusBarIconBrightness:
             colorScheme.brightness == Brightness.dark
                 ? Brightness.light

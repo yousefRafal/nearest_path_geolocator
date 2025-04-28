@@ -1,5 +1,4 @@
-import 'dart:developer';
-
+import 'package:intl/intl.dart' show DateFormat;
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:test_geolocator_android/features/home/data/address.dart';
@@ -33,7 +32,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE address_files(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        date TEXT NOT NULL,
+        date TEXT NOT NULL UNIQUE,
         name TEXT NOT NULL
       )
     ''');
@@ -71,12 +70,40 @@ class DatabaseHelper {
     // في ملف database_helper.dart
   }
 
+  Future<bool> canAddFileToday() async {
+    final db = await database;
+    final today = DateFormat.yMMMMd('ar').format(DateTime.now());
+
+    final result = await db.query(
+      'address_files',
+      where: 'name = ?',
+      whereArgs: [today],
+    );
+
+    return result.isEmpty;
+  }
+
   // Address File operations
   Future<int> createAddressFile(AddressFile file) async {
     final db = await database;
-    log(file.toMap().toString());
+    if (!await canAddFileToday()) {
+      throw Exception('❗ تم إضافة ملف اليوم مسبقاً');
+    }
 
     return await db.insert('address_files', file.toMap());
+  }
+
+  Future<Map<String, dynamic>?> getTodayFile() async {
+    final db = await this.database;
+    final today = DateFormat.yMMMMd('ar').format(DateTime.now());
+
+    final result = await db.query(
+      'address_files',
+      where: 'name = ?',
+      whereArgs: [today],
+    );
+
+    return result.isNotEmpty ? result.first : null;
   }
 
   Future<List<AddressFile>> getAllAddressFiles() async {
@@ -112,7 +139,10 @@ class DatabaseHelper {
   // Address operations
   Future<void> insertAddress(Address addresses) async {
     final db = await database;
-
+    if (addresses.fileId == null) {
+      final fileId = await getOrCreateTodayFile();
+      addresses = addresses.copyWith(fileId: fileId);
+    }
     await db.insert(
       'addresses',
       addresses.toMap(),
@@ -212,5 +242,34 @@ class DatabaseHelper {
   Future<void> deleteAddressFile(int id) async {
     final db = await database;
     await db.delete('address_files', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<int> getOrCreateTodayFile({DateTime? date}) async {
+    final db = await this.database;
+
+    final formattedDate = DateFormat.yMMMMd(
+      'ar',
+    ).format(date ?? DateTime.now());
+
+    // التحقق من وجود ملف اليوم
+    final existingFile = await db.query(
+      'address_files',
+      where: 'name = ?',
+      whereArgs: [formattedDate],
+      limit: 1,
+    );
+
+    // إذا كان الملف موجوداً، أرجع الـ ID
+    if (existingFile.isNotEmpty) {
+      return existingFile.first['id'] as int;
+    }
+
+    // إذا لم يكن موجوداً، أنشئ ملفاً جديداً
+    final newFileId = await db.insert('address_files', {
+      'name': DateFormat.yMMMMd('ar').format(date ?? DateTime.now()),
+      'date': date ?? DateTime.now(),
+    });
+
+    return newFileId;
   }
 }

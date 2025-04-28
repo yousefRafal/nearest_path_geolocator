@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:test_geolocator_android/core/routes/routes.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/routes/app_router.dart';
 import 'core/theme/app_theme..dart';
@@ -27,7 +28,24 @@ class MyApp extends StatelessWidget {
       useInheritedMediaQuery: false,
       builder: (context, child) {
         return MaterialApp(
-          initialRoute: Routes.homeScreen,
+          locale: Locale('ar'),
+          supportedLocales: const [Locale('en'), Locale('ar')],
+          localizationsDelegates: [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          localeResolutionCallback: (deviceLocale, supportedLocales) {
+            for (var locale in supportedLocales) {
+              if (deviceLocale != null &&
+                  deviceLocale.languageCode == locale.languageCode) {
+                return deviceLocale;
+              }
+            }
+
+            return supportedLocales.first;
+          },
+          initialRoute: Routes.homePage,
           debugShowCheckedModeBanner: false,
           title: 'Route Optimizer',
           theme: AppTheme.appTeme,

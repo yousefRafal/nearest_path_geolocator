@@ -5,21 +5,20 @@ import 'dart:developer';
 class Address {
   final String id;
   final String orderId;
-  // final AddressDetails addressDetails;
-  final String status;
-  final DateTime scanTimestamp;
+  final String? buildingNumber;
+  final String? status;
+  final String? street;
+  final DateTime? scanTimestamp;
   final bool isDone;
-  final String buildingNumber;
-  final String street;
-  final String district;
-  final String postalCode;
-  final String city;
-  final String region;
-  final String country;
+  final String? district;
+  final String? postalCode;
+  final String? city;
+  final String? region;
+  final String? country;
   final String fullAddress;
-  final double lat;
+  final double? lat;
   final int? fileId;
-  final double lng;
+  final double? lng;
 
   Address({
     this.fileId,
@@ -86,7 +85,7 @@ class Address {
       'order_id': orderId,
       'is_done': isDone ? 1 : 0, // العمود الصحيح
       'status': status, // العمود الصحيح
-      'scan_timestamp': scanTimestamp.millisecondsSinceEpoch,
+      'scan_timestamp': scanTimestamp?.millisecondsSinceEpoch,
       'building_number': buildingNumber,
       'street': street,
       'district': district,

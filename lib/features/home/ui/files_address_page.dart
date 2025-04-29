@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -48,7 +49,49 @@ class _FilesAddressPageState extends State<FilesAddressPage> {
         child: Column(
           children: [
             BlocConsumer<AddressBloc, AddressState>(
-              listener: (context, state) {},
+              listener: (context, state) {
+                if (state is AddressError) {
+                  //dialog
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Column(
+                          children: [
+                            Text(
+                              'خطأ',
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                            SizedBox(height: 20.h),
+                            Icon(
+                              size: 43.r,
+                              Icons.cancel_outlined,
+                              color: Theme.of(context).colorScheme.background,
+                            ),
+                          ],
+                        ),
+                        content: Text(state.message),
+                        actions: [
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors.white,
+                            ),
+                            child: const Text('اغلاق'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  ).then((value) {
+                    if (context.mounted) {
+                      context.read<AddressBloc>().add(LoadAddressFiles());
+                    }
+                  });
+                }
+              },
               builder: (context, state) {
                 if (state is AddressLoading) {
                   return const Center(child: CircularProgressIndicator());
@@ -71,7 +114,9 @@ class _FilesAddressPageState extends State<FilesAddressPage> {
                         child: Container(
                           decoration: BoxDecoration(
                             border: Border.all(
-                              color: Theme.of(context).colorScheme.secondary,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withOpacity(0.6),
                             ),
                             borderRadius: BorderRadius.circular(30),
                           ),
@@ -86,7 +131,7 @@ class _FilesAddressPageState extends State<FilesAddressPage> {
                               borderRadius: BorderRadius.circular(30),
 
                               child: ExpansionTile(
-                                shape: const RoundedRectangleBorder(
+                                shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.all(
                                     Radius.circular(30),
                                   ),
@@ -170,7 +215,7 @@ class _FilesAddressPageState extends State<FilesAddressPage> {
                                           // height: 300.h,
                                           child: ListTile(
                                             title: Text(
-                                              address.region,
+                                              address.region ?? '',
                                               style: Theme.of(
                                                 context,
                                               ).textTheme.titleMedium?.copyWith(
@@ -288,7 +333,7 @@ class _FilesAddressPageState extends State<FilesAddressPage> {
                                               Map<String, dynamic> addressJson =
                                                   json.decode('''
                                                       {
-                                                      "order_id": "343",
+                                                      "order_id": "4234",
                                                         "building_number": "7352",
                                                         "street": "شارع 50",
                                                         "district": "حي العزيزية",
@@ -297,16 +342,16 @@ class _FilesAddressPageState extends State<FilesAddressPage> {
                                                         "is_done": 0,
                                                         "region": "منطقة الرياض",
                                                         "country": "المملكة العربية السعودية",
-                                                        "full_address": "7352 شارع 50 حي العزيزية, الرياض 125335 المملكة العربية السعودية",
+                                                        "full_address": "رقم 255، المونسية، الرياض 13246، السعودية",
 
                                                         "lat": 25.7236,
                                                         "lng": 48.6853,
                                                       "status": "pending",
                                                       "scan_timestamp":3243423,
-                                                      "id": "100"
+                                                      "id": "202"
                                                     }
                                               ''');
-
+                                              log(file.id.toString());
                                               Address address = Address.fromMap(
                                                 addressJson,
                                               );
@@ -433,10 +478,10 @@ class _FilesAddressPageState extends State<FilesAddressPage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _createNewAddressFile,
-        child: const Icon(Icons.add),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: _createNewAddressFile,
+      //   child: const Icon(Icons.add),
+      // ),
     );
   }
 }

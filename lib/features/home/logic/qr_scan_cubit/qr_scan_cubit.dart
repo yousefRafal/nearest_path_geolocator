@@ -12,8 +12,9 @@ class QrScanCubit extends Cubit<QrScanState> {
   }
 
   Future<void> initQrScan() async {
-    emit(state.copyWith(
-        qrKey: GlobalKey(debugLabel: 'qr_scan'), isPaused: true));
+    emit(
+      state.copyWith(qrKey: GlobalKey(debugLabel: 'qr_scan'), isPaused: true),
+    );
   }
 
   Future<void> pauseResumeCamera() async {
@@ -22,9 +23,12 @@ class QrScanCubit extends Cubit<QrScanState> {
     } else {
       await state.controller?.pauseCamera();
     }
-    emit(state.copyWith(
+    emit(
+      state.copyWith(
         isPaused: ((state.isPaused ?? false) ? false : true),
-        detectedBarcode: null));
+        detectedBarcode: null,
+      ),
+    );
   }
 
   Future<void> barcodeDetected(Barcode barcode) async {

@@ -9,7 +9,7 @@ import 'package:test_geolocator_android/features/home/logic/address_bloc.dart';
 import 'dart:convert';
 
 class ScannerScreen extends StatefulWidget {
-  static const String routeName = '/scannerScreen';
+  static const String routeName = Routes.scannerScreen;
   final int fileId;
 
   const ScannerScreen({super.key, required this.fileId});
@@ -44,9 +44,9 @@ class _ScannerScreenState extends State<ScannerScreen> {
       if (code.trim().startsWith('{') && code.trim().endsWith('}')) {
         try {
           final jsonData = json.decode(code) as Map<String, dynamic>;
-          address = Address.fromJson(jsonData);
+          address = Address.fromMap(jsonData);
         } catch (e) {
-          throw Exception('Invalid JSON format in QR code');
+          throw Exception('خطأ في قراءة الباركود يجب قراءة باركود صحيح');
         }
       }
       // باقي أنواع الباركود (خرائط جوجل، geo، إلخ...)
@@ -57,18 +57,40 @@ class _ScannerScreenState extends State<ScannerScreen> {
 
       if (address != null) {
         if (mounted) {
-          context.read<AddressBloc>().add(AddAddress(address, widget.fileId));
-          Navigator.pushNamed(
-            context,
-            Routes.mapScreen,
-            arguments: widget.fileId,
+          AlertDialog(
+            title: const Text('نتيجة'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('هل تريد عرض العنوان على الخريطة؟'),
+                const SizedBox(height: 10),
+                Text('العنوان : ${address.fullAddress}'),
+                const SizedBox(height: 20),
+                const Text('ام تريد اضافة المزيد من العناوين ؟'),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pushNamed(context, Routes.mapScreen),
+                child: const Text('عرض'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  context.read<AddressBloc>().add(
+                    AddAddress(address!, fileId: widget.fileId),
+                  );
+                },
+                child: const Text('اضافة العنوان'),
+              ),
+            ],
           );
         }
       } else {
-        throw Exception('Unsupported QR code format');
+        throw Exception('تنسسيق غير مدعوم');
       }
     } catch (e) {
-      log('Error processing QR code: ${e.toString()}');
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
@@ -131,13 +153,8 @@ class _ScannerScreenState extends State<ScannerScreen> {
                 context: context,
                 builder:
                     (context) => AlertDialog(
-                      title: const Text('Supported QR Formats'),
-                      content: const Text(
-                        '1. Order|Address (e.g. ORD123|123 Main St)\n'
-                        '2. Google Maps URL (e.g. http://maps.google.com/...)\n'
-                        '3. Geo URI (e.g. geo:51.41,5.44)\n'
-                        '4. JSON format with order details',
-                      ),
+                      title: const Text('التنسيقات المدعومة'),
+                      content: const Text('1. JSON format with order details'),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context),

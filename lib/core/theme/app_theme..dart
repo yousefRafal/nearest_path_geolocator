@@ -12,9 +12,10 @@ class AppTheme {
   ).withOpacity(0.12);
 
   static ColorScheme colorScheme = const ColorScheme(
-    primary: Color.fromARGB(255, 93, 130, 101),
+    primary: const Color(0xFF235D3A),
+
     onPrimary: Color.fromARGB(255, 252, 252, 252),
-    secondary: Colors.black12,
+    secondary: Color(0xFF1D2E28),
     onSecondary: Colors.white,
     error: Colors.redAccent,
     inversePrimary: Color.fromARGB(255, 54, 131, 255),
@@ -29,9 +30,9 @@ class AppTheme {
     tertiary: Colors.black12,
     onSurfaceVariant: Color(0xFF241E30),
     onError: Colors.white,
-    background: Color.fromARGB(255, 233, 249, 232),
+    background: Color.fromARGB(255, 245, 255, 244),
     onBackground: Color(0xFF241E30),
-    surface: Color.fromARGB(146, 68, 154, 83),
+    surface: Color(0xFF73C088),
     onSurface: Color(0xFF241E30),
     brightness: Brightness.light,
   );

@@ -8,7 +8,7 @@ import 'package:test_geolocator_android/features/home/logic/address_bloc.dart';
 import 'package:test_geolocator_android/features/home/logic/qr_scan_cubit/qr_scan_cubit.dart';
 import 'package:test_geolocator_android/features/home/ui/home_page_o.dart';
 import 'package:test_geolocator_android/features/home/ui/map_screen.dart';
-import 'package:test_geolocator_android/features/home/ui/file_address_page.dart';
+import 'package:test_geolocator_android/features/home/ui/files_address_page.dart';
 import 'package:test_geolocator_android/features/home/ui/widgets/scanner_page.dart';
 
 import '../../features/home/logic/bottom_navigation/bottom_navigation_cubit.dart';
@@ -30,13 +30,13 @@ class AppRouter {
                     create:
                         (_) =>
                             AddressBloc(DatabaseHelper())
-                              ..add(ShowFiledAddressing((1))),
+                              ..add(ShowFiledAddressing((9))),
                   ),
                   Provider<QrScanCubit>(
                     create: (_) => QrScanCubit()..initQrScan(),
                   ),
                 ],
-                child: FilesAddressPage(),
+                child: HomePage(),
               ),
         );
       // case LoginPage.routeName:

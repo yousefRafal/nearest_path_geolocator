@@ -1,10 +1,15 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import 'package:test_geolocator_android/core/routes/routes.dart';
+import 'package:test_geolocator_android/features/home/data/address.dart';
+import 'package:test_geolocator_android/features/home/data/data_source/database_service.dart';
+import 'package:test_geolocator_android/features/home/logic/address_bloc.dart';
 import 'package:test_geolocator_android/features/home/logic/qr_scan_cubit/qr_scan_cubit.dart';
 import 'package:test_geolocator_android/features/home/ui/home_page_o.dart';
 
@@ -17,6 +22,15 @@ class QRSearchOrderPage extends StatefulWidget {
 }
 
 class _QRSearchOrderPageState extends State<QRSearchOrderPage> {
+  late int filedId;
+  @override
+  void initState() {
+    // filedId = DatabaseHelper().getLastFiledId();
+
+    // TODO: implement initState
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     // ignore: deprecated_member_use
@@ -63,15 +77,26 @@ class _QRSearchOrderPageState extends State<QRSearchOrderPage> {
                         child: Row(
                           children: [
                             IconButton(
+                              style: IconButton.styleFrom(
+                                padding: EdgeInsets.all(5.dg),
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.secondary,
+                                foregroundColor:
+                                    Theme.of(context).colorScheme.background,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(9),
+                                ),
+                              ),
                               onPressed: () async {
                                 context.read<QrScanCubit>().toggleFlashLight();
                               },
+
                               icon:
                                   state.isFlashOn ?? false
-                                      ? const Icon(
+                                      ? Icon(
                                         Icons.flash_off,
                                         color: Colors.white,
-                                        size: 36,
+                                        size: 20.w,
                                       )
                                       : const Icon(
                                         Icons.flash_on,
@@ -150,11 +175,12 @@ class _QRSearchOrderPageState extends State<QRSearchOrderPage> {
       key: qrKey,
       onQRViewCreated: (QRViewController controller) async {
         controller.scannedDataStream.listen((scanData) {
-          print(scanData.code);
           log('scannedDataStream');
           log(scanData.code.toString());
-          // context.read<QrScanBloc>().add(const PauseResumeCamera());
-          context.read<QrScanCubit>().barcodeDetected(scanData);
+          _processQRCode(scanData.code!);
+          if (context.mounted) {
+            context.read<QrScanCubit>().pauseResumeCamera();
+          }
         });
         context.read<QrScanCubit>().initQrController(controller);
       },
@@ -167,6 +193,72 @@ class _QRSearchOrderPageState extends State<QRSearchOrderPage> {
       ),
       onPermissionSet: (ctrl, p) => _onPermissionSet(context, ctrl, p),
     );
+  }
+
+  Future<void> _processQRCode(String code) async {
+    try {
+      log(code);
+      Address? address;
+
+      // الحالة 1: رابط خرائط جوجل
+
+      // الحالة 2: تنسيق geo
+      // الحالة 3: تنسيق JSON
+      if (code.trim().startsWith('{') && code.trim().endsWith('}')) {
+        try {
+          final jsonData = json.decode(code) as Map<String, dynamic>;
+          address = Address.fromMap(jsonData);
+        } catch (e) {
+          throw Exception('خطأ في قراءة الباركود يجب قراءة باركود صحيح');
+        }
+      }
+
+      if (address != null) {
+        if (mounted) {
+          AlertDialog(
+            title: const Text('نتيجة'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('هل تريد عرض العنوان على الخريطة؟'),
+                const SizedBox(height: 10),
+                Text('العنوان : ${address.fullAddress}'),
+                const SizedBox(height: 20),
+                const Text('ام تريد اضافة المزيد من العناوين ؟'),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pushNamed(context, Routes.mapScreen),
+                child: const Text('عرض'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  final fileId = await DatabaseHelper().getOrCreateTodayFile(
+                    date: DateTime.now(),
+                  );
+                  if (mounted) {
+                    Navigator.pop(context);
+                    context.read<AddressBloc>().add(
+                      AddAddress(address!, fileId: fileId),
+                    );
+                  }
+                },
+                child: const Text('اضافة العنوان'),
+              ),
+            ],
+          );
+        }
+      } else {
+        throw Exception('تنسسيق غير مدعوم');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+      // عرض خيار الإدخال اليدوي عند الخطأ
+    } finally {}
   }
 
   void barcodeDetected(String? barcode) async {}

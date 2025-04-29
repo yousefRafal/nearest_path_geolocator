@@ -2,16 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:test_geolocator_android/features/home/logic/bottom_navigation/bottom_navigation_cubit.dart';
-import 'package:test_geolocator_android/features/home/ui/last_addressing_page.dart';
-import 'package:test_geolocator_android/features/home/ui/map_widget.dart';
 import 'package:test_geolocator_android/features/home/ui/qr_scan_page.dart';
+import 'package:test_geolocator_android/features/home/ui/files_address_page.dart';
+import 'package:test_geolocator_android/features/home/ui/tcp_routes_page.dart';
 import 'package:test_geolocator_android/features/home/ui/widgets/qr_button.dart';
 
 import '../../../../core/routes/routes.dart';
 import '../../../../core/utils/bouncing_button.dart';
 
 class HomePage extends StatefulWidget {
-  List<Widget> get widgets => [const MapWidget(), const LastAddressingPage()];
+  List<Widget> get widgets => [
+    TcpRoutesPage(fileId: 9),
+    const FilesAddressPage(),
+  ];
   static const String routeName = Routes.homePage;
   const HomePage({super.key});
 
@@ -38,12 +41,7 @@ class _HomePageState extends State<HomePage> {
           duration: Duration(milliseconds: 150),
           pressScale: 0.85,
           onPress: () async {
-            // await context.read<QrScanCubit>().initQrScan();
             Navigator.pushNamed(context, QRSearchOrderPage.routeName);
-            // ScaleTransitionScreen(const QRSearchOrderPage());
-            // Navigator.of(context).pushNamed(ScaleTransitionScreen(
-            //     routeName: QRSearchOrderPage.routeName,
-            //     builder: (context) => const QRSearchOrderPage()));
           },
           child: DiamondSquare(
             color: Theme.of(context).colorScheme.secondary,
@@ -58,15 +56,21 @@ class _HomePageState extends State<HomePage> {
           clipBehavior: Clip.antiAliasWithSaveLayer,
           shape: const CircularNotchedRectangle(),
           notchMargin: 0,
-
-          // shadowColor: const Color(234),
+          shadowColor: Theme.of(context).colorScheme.primary,
           elevation: 0,
-          // color: color: Theme.of(context).colorScheme.secondary,,
           child: BlocConsumer<BottomNavigationCubit, BottomNavigationState>(
             listener: (context, state) {},
             builder: (context, state) {
               return Container(
                 decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      blurRadius: 8,
+                      offset: const Offset(0, 1),
+                      spreadRadius: 1,
+                      color: Theme.of(context).colorScheme.surface,
+                    ),
+                  ],
                   color: Theme.of(context).colorScheme.onPrimary,
                   borderRadius: const BorderRadius.all(Radius.circular(15)),
                 ),
@@ -90,7 +94,7 @@ class _HomePageState extends State<HomePage> {
                                   ? Icons.home
                                   : Icons.home_outlined,
                               size: 30.w,
-                              color: Theme.of(context).colorScheme.secondary,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                           ),
                         ),
@@ -106,7 +110,7 @@ class _HomePageState extends State<HomePage> {
                                   ? Icons.category
                                   : Icons.category_outlined,
                               size: 30.w,
-                              color: Theme.of(context).colorScheme.secondary,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                           ),
                         ),

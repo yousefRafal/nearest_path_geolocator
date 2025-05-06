@@ -37,9 +37,59 @@ class _FilesAddressPageState extends State<FilesAddressPage> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
-        title: const Text('Order Tracking'),
+        // leadingWidth: 50,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          constraints: BoxConstraints(
+            minWidth: 30.w,
+            minHeight: 30.h,
+            maxHeight: 40.h,
+            maxWidth: 40.w,
+          ),
+          autofocus: false,
+          padding: EdgeInsets.zero,
+          iconSize: 20.sp,
+          icon: const Icon(Icons.arrow_back_ios_new_outlined),
+          alignment: Alignment.center,
+
+          style: IconButton.styleFrom(
+            iconSize: 20.sp,
+            alignment: Alignment.center,
+            padding: EdgeInsets.zero,
+
+            backgroundColor: Theme.of(
+              context,
+            ).colorScheme.secondary.withOpacity(0.3),
+            foregroundColor: Theme.of(context).colorScheme.background,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(9),
+            ),
+          ),
+          // onPressed: ,
+        ),
+        title: const Text('ملفات العناوين'),
         actions: [
           IconButton(
+            constraints: BoxConstraints(
+              minWidth: 30.w,
+              minHeight: 30.h,
+              maxHeight: 40.h,
+              maxWidth: 40.w,
+            ),
+            style: IconButton.styleFrom(
+              alignment: Alignment.center,
+              padding: EdgeInsets.zero,
+
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.secondary.withOpacity(0.3),
+              foregroundColor: Theme.of(context).colorScheme.background,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(9),
+              ),
+            ),
             icon: const Icon(Icons.add),
             onPressed: _createNewAddressFile,
           ),
@@ -124,7 +174,6 @@ class _FilesAddressPageState extends State<FilesAddressPage> {
                             clipBehavior: Clip.antiAlias,
 
                             child: Material(
-                              // Added Material widget for better ink splash effects
                               color: Theme.of(
                                 context,
                               ).colorScheme.primary.withOpacity(0.05),
@@ -212,14 +261,13 @@ class _FilesAddressPageState extends State<FilesAddressPage> {
                                       .take(3)
                                       .map(
                                         (address) => SizedBox(
-                                          // height: 300.h,
                                           child: ListTile(
                                             title: Text(
                                               address.region ?? '',
                                               style: Theme.of(
                                                 context,
                                               ).textTheme.titleMedium?.copyWith(
-                                                color: Colors.grey[800],
+                                                color: Colors.white,
                                               ),
                                             ),
                                             subtitle: Text(
@@ -227,19 +275,22 @@ class _FilesAddressPageState extends State<FilesAddressPage> {
                                               style: Theme.of(
                                                 context,
                                               ).textTheme.titleSmall?.copyWith(
-                                                color: Colors.grey[800],
+                                                color: Colors.white,
                                               ),
                                             ),
                                             trailing: Wrap(
                                               children: [
-                                                if (!address.isDone)
+                                                if (address.isDone != null &&
+                                                    address.isDone == true)
                                                   IconButton(
                                                     style: IconButton.styleFrom(
                                                       padding: EdgeInsets.zero,
-                                                      backgroundColor:
-                                                          Theme.of(context)
-                                                              .colorScheme
-                                                              .secondary,
+                                                      backgroundColor: Theme.of(
+                                                            context,
+                                                          )
+                                                          .colorScheme
+                                                          .secondary
+                                                          .withOpacity(0.5),
                                                       foregroundColor:
                                                           Theme.of(context)
                                                               .colorScheme
@@ -270,10 +321,10 @@ class _FilesAddressPageState extends State<FilesAddressPage> {
                                                 IconButton(
                                                   style: IconButton.styleFrom(
                                                     padding: EdgeInsets.zero,
-                                                    backgroundColor:
-                                                        Theme.of(
+                                                    backgroundColor: Theme.of(
                                                           context,
-                                                        ).colorScheme.secondary,
+                                                        ).colorScheme.secondary
+                                                        .withOpacity(0.5),
                                                     foregroundColor: Theme.of(
                                                           context,
                                                         ).colorScheme.error
@@ -310,18 +361,6 @@ class _FilesAddressPageState extends State<FilesAddressPage> {
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Row(
-                                      // spacing: 40.w,
-                                      // crossAxisAlignment:
-                                      //     WrapCrossAlignment.center,
-                                      // // clipBehavior: Clip.antiAlias
-                                      // runAlignment: WrapAlignment.spaceAround,
-                                      // direction: Axis.horizontal,
-                                      // // verticalDirection: VerticalDirection.down,
-                                      // // crossAxisAlignment:
-                                      // //     WrapCrossAlignment.center,
-                                      // // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                      // // verticalDirection: VerticalDirection.down,
-                                      // alignment: WrapAlignment.spaceBetween,
                                       crossAxisAlignment:
                                           CrossAxisAlignment.center,
                                       mainAxisAlignment:
@@ -342,13 +381,12 @@ class _FilesAddressPageState extends State<FilesAddressPage> {
                                                         "is_done": 0,
                                                         "region": "منطقة الرياض",
                                                         "country": "المملكة العربية السعودية",
-                                                        "full_address": "رقم 255، المونسية، الرياض 13246، السعودية",
-
+                                                        "full_address": "RUMC7351، 7351 القنا، 3255، المونسية، الرياض 13246، السعودية, الرياض, السعودية",
                                                         "lat": 25.7236,
                                                         "lng": 48.6853,
                                                       "status": "pending",
                                                       "scan_timestamp":3243423,
-                                                      "id": "202"
+                                                      "id": "5433"
                                                     }
                                               ''');
                                               log(file.id.toString());
@@ -361,12 +399,9 @@ class _FilesAddressPageState extends State<FilesAddressPage> {
                                                   fileId: file.id!,
                                                 ),
                                               );
-                                              // Navigator.pushReplacementNamed(
-                                              //   context,
-                                              //   Routes.homeScreen,
-                                              //   // arguments: file.id,
-                                              // );
-                                            } catch (e) {}
+                                            } catch (e) {
+                                              // print('object');
+                                            }
                                           },
                                           style: ElevatedButton.styleFrom(
                                             shape: RoundedRectangleBorder(
@@ -414,12 +449,9 @@ class _FilesAddressPageState extends State<FilesAddressPage> {
                                                   ).colorScheme.surface,
                                             ),
                                             onPressed: () {
-                                              // context.read<AddressBloc>().add(
-                                              //   ShowFiledAddressing(file.id!),
-                                              // );
                                               Navigator.pushNamed(
                                                 context,
-                                                Routes.mapScreen,
+                                                Routes.tcpRoutes,
                                                 arguments: file.id,
                                               );
                                             },
@@ -485,3 +517,5 @@ class _FilesAddressPageState extends State<FilesAddressPage> {
     );
   }
 }
+//رقم 255، المونسية، الرياض 13246، السعودية
+//رقم 255، المونسية، الرياض 13246، السعودية

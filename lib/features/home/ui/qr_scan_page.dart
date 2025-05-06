@@ -25,9 +25,6 @@ class _QRSearchOrderPageState extends State<QRSearchOrderPage> {
   late int filedId;
   @override
   void initState() {
-    // filedId = DatabaseHelper().getLastFiledId();
-
-    // TODO: implement initState
     super.initState();
   }
 
@@ -174,15 +171,21 @@ class _QRSearchOrderPageState extends State<QRSearchOrderPage> {
     return QRView(
       key: qrKey,
       onQRViewCreated: (QRViewController controller) async {
+        context.read<QrScanCubit>().initQrController(controller);
         controller.scannedDataStream.listen((scanData) {
           log('scannedDataStream');
           log(scanData.code.toString());
-          _processQRCode(scanData.code!);
           if (context.mounted) {
-            context.read<QrScanCubit>().pauseResumeCamera();
+            context.read<QrScanCubit>().pauseResumeCamera().then((v) {
+              _processQRCode(scanData.code?.toString() ?? "", context);
+              // Navigator.of(context).pop();
+            });
           }
+          // if (!context.mounted) {
+          // context.read<QrScanCubit>().pauseResumeCamera();
+
+          // }
         });
-        context.read<QrScanCubit>().initQrController(controller);
       },
       overlay: QrScannerOverlayShape(
         borderColor: Theme.of(context).primaryColor,
@@ -195,7 +198,7 @@ class _QRSearchOrderPageState extends State<QRSearchOrderPage> {
     );
   }
 
-  Future<void> _processQRCode(String code) async {
+  Future<void> _processQRCode(String code, BuildContext context) async {
     try {
       log(code);
       Address? address;
@@ -211,48 +214,40 @@ class _QRSearchOrderPageState extends State<QRSearchOrderPage> {
         } catch (e) {
           throw Exception('خطأ في قراءة الباركود يجب قراءة باركود صحيح');
         }
+      } else {
+        final fileId = await DatabaseHelper().getOrCreateTodayFile(
+          date: DateTime.now(),
+        );
+        final fullAddress = {
+          'id': DateTime.now().millisecondsSinceEpoch.toString(),
+          'lat': 0.0,
+          'lng': 0.0,
+          'building_number': '',
+          'street': '',
+          'district': '',
+          'postal_code': '',
+          'city': '',
+          'region': '',
+          'country': '',
+          'status': 'pending',
+          'scan_timestamp': 32434234234,
+          'is_done': 0,
+          'order_id': '',
+          'file_id': fileId,
+          'full_address': code,
+        };
+        address = Address.fromMap(fullAddress);
       }
 
-      if (address != null) {
-        if (mounted) {
-          AlertDialog(
-            title: const Text('نتيجة'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('هل تريد عرض العنوان على الخريطة؟'),
-                const SizedBox(height: 10),
-                Text('العنوان : ${address.fullAddress}'),
-                const SizedBox(height: 20),
-                const Text('ام تريد اضافة المزيد من العناوين ؟'),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pushNamed(context, Routes.mapScreen),
-                child: const Text('عرض'),
-              ),
-              TextButton(
-                onPressed: () async {
-                  final fileId = await DatabaseHelper().getOrCreateTodayFile(
-                    date: DateTime.now(),
-                  );
-                  if (mounted) {
-                    Navigator.pop(context);
-                    context.read<AddressBloc>().add(
-                      AddAddress(address!, fileId: fileId),
-                    );
-                  }
-                },
-                child: const Text('اضافة العنوان'),
-              ),
-            ],
-          );
-        }
-      } else {
-        throw Exception('تنسسيق غير مدعوم');
-      }
+      // if (mounted) {
+      SnackBar snackBar = SnackBar(
+        content: Text('تم إضافة العنوان بنجاح'),
+        backgroundColor: Colors.green,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      // }
+
+      context.read<AddressBloc>().add(AddAddress(address, fileId: filedId));
     } catch (e) {
       ScaffoldMessenger.of(
         context,

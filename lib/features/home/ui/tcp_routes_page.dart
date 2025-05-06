@@ -7,13 +7,12 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:test_geolocator_android/core/routes/routes.dart';
 import 'package:test_geolocator_android/features/home/data/address.dart';
-import 'package:test_geolocator_android/features/home/data/repos/dirction_service.dart';
 import 'package:test_geolocator_android/features/home/data/repos/test_tcp_optimzation.dart';
 import 'package:test_geolocator_android/features/home/logic/address_bloc.dart';
 
 class TcpRoutesPage extends StatefulWidget {
   static const String routeName = Routes.tcpRoutes;
-  final int fileId;
+  final int? fileId;
   const TcpRoutesPage({super.key, required this.fileId});
 
   @override
@@ -32,7 +31,16 @@ class _TcpRoutesPageState extends State<TcpRoutesPage> {
   @override
   void initState() {
     super.initState();
-    _routeService = TestTcpOptimzation('yah');
+
+    context.read<AddressBloc>().add(ShowFiledAddressing(fileId: widget.fileId));
+    //! api key
+    _routeService = TestTcpOptimzation('');
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _routeService.dispose();
   }
 
   Future<void> _getCurrentLocation() async {
@@ -50,7 +58,7 @@ class _TcpRoutesPageState extends State<TcpRoutesPage> {
     }
   }
 
-  Future<void> _optimizeRoute(List<Address> addresses) async {
+  Future<void> _optimizeRoute(List<Address> addresses, {int fileId = 0}) async {
     if (addresses.isEmpty) return;
 
     setState(() => _isLoading = true);
@@ -58,7 +66,7 @@ class _TcpRoutesPageState extends State<TcpRoutesPage> {
     _polylines.clear();
 
     try {
-      final addressStrings = addresses.map((a) => a.fullAddress).toList();
+      final addressStrings = addresses.map((a) => a).toList();
 
       // استخدام العنوان الحالي كنقطة بداية
       final startAddress =
@@ -68,8 +76,8 @@ class _TcpRoutesPageState extends State<TcpRoutesPage> {
 
       final response = await _routeService.optimizeAndDrawRoute(
         startAddress: startAddress,
+
         destinationAddresses: addressStrings,
-        mode: TravelMode.driving,
       );
 
       if (response != null && mounted) {
@@ -163,7 +171,7 @@ class _TcpRoutesPageState extends State<TcpRoutesPage> {
                     print('--------------print is full ');
                     _mapController.complete(controller);
 
-                    _optimizeRoute(state.addresses);
+                    _optimizeRoute(state.addresses, fileId: state.fileId);
                   },
                   initialCameraPosition: CameraPosition(
                     target: LatLng(37.7749, -122.4194),

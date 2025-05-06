@@ -244,25 +244,19 @@ class AppTheme {
 
     appBarTheme: AppBarTheme(
       foregroundColor: colorScheme.onPrimary,
-      titleSpacing: 30,
+      // titleSpacing: 30,
       titleTextStyle: AppTextStyles.headerMedium.copyWith(
         color: colorScheme.onPrimary,
       ),
-      actionsIconTheme: IconThemeData(color: colorScheme.primary),
-      iconTheme: IconThemeData(
-        applyTextScaling: true,
-        color: colorScheme.primary,
-        size: 24.sp,
-        opacity: 0.8.sp,
-        weight: const Icon(Icons.add).weight,
-      ),
+      actionsIconTheme: IconThemeData(color: colorScheme.background),
+
       shadowColor: Colors.transparent,
       elevation: 0.0,
       // backgroundColor: colorScheme.surface,
-      surfaceTintColor: Colors.red,
+      // surfaceTintColor: Colors.red,
       centerTitle: true,
 
-      actionsPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 15.h),
+      actionsPadding: EdgeInsets.symmetric(horizontal: 20.w),
       color: colorScheme.surface,
       systemOverlayStyle: SystemUiOverlayStyle(
         statusBarColor: colorScheme.surface.withOpacity(0.10),

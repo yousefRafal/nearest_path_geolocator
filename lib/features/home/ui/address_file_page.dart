@@ -30,7 +30,7 @@ class AddressFilePage extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(Radius.circular(15.r)),
         border:
-            address.isDone
+            address.isDone == true
                 ? Border.all(
                   color: Theme.of(context).colorScheme.primary,
                   width: 3,
@@ -38,7 +38,7 @@ class AddressFilePage extends StatelessWidget {
                 : null,
 
         color:
-            address.isDone
+            address.isDone == true
                 ? Theme.of(context).colorScheme.primary.withOpacity(0.5)
                 : null,
       ),

@@ -21,8 +21,9 @@ class FilesLoaded extends AddressState {
 
 class AddressFileLoaded extends AddressState {
   final List<Address> addresses;
+  final int fileId;
 
-  AddressFileLoaded(this.addresses);
+  AddressFileLoaded(this.addresses, {this.fileId = 0});
 
   @override
   List<Object> get props => [addresses];

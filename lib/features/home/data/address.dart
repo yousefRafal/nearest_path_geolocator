@@ -4,12 +4,12 @@ import 'dart:developer';
 
 class Address {
   final String id;
-  final String orderId;
+  final String? orderId;
   final String? buildingNumber;
   final String? status;
   final String? street;
   final DateTime? scanTimestamp;
-  final bool isDone;
+  final bool? isDone;
   final String? district;
   final String? postalCode;
   final String? city;
@@ -23,20 +23,20 @@ class Address {
   Address({
     this.fileId,
     required this.id,
-    required this.orderId,
-    required this.status,
-    required this.scanTimestamp,
-    required this.isDone,
-    required this.buildingNumber,
-    required this.street,
-    required this.district,
-    required this.postalCode,
-    required this.city,
-    required this.region,
-    required this.country,
+    this.orderId,
+    this.status,
+    this.scanTimestamp,
+    this.isDone,
+    this.buildingNumber,
+    this.street,
+    this.district,
+    this.postalCode,
+    this.city,
+    this.region,
+    this.country,
     required this.fullAddress,
-    required this.lat,
-    required this.lng,
+    this.lat,
+    this.lng,
   });
 
   Address copyWith({
@@ -83,7 +83,7 @@ class Address {
       'id': id,
       'file_id': fileId,
       'order_id': orderId,
-      'is_done': isDone ? 1 : 0, // العمود الصحيح
+      'is_done': isDone ?? false ? 1 : 0, // العمود الصحيح
       'status': status, // العمود الصحيح
       'scan_timestamp': scanTimestamp?.millisecondsSinceEpoch,
       'building_number': buildingNumber,
@@ -101,11 +101,11 @@ class Address {
 
   factory Address.fromMap(Map<String, dynamic> map) {
     // التحقق من القيم المطلوبة
-    assert(map['id'] != null, 'Address ID is required');
-    assert(
-      map['lat'] != null && map['lng'] != null,
-      'Coordinates are required',
-    );
+    // assert(map['id'] != null, 'Address ID is required');
+    // assert(
+    //   map['lat'] != null && map['lng'] != null,
+    //   'Coordinates are required',
+    // );
 
     // التحقق من صحة الحالة
     final status = map['status']?.toString().toLowerCase() ?? 'pending';
@@ -115,12 +115,12 @@ class Address {
     );
 
     return Address(
-      id: map['id'] as String,
+      id: map['id']?.toString() ?? '',
       fileId: map['file_id'] as int?, // يسمح بقيمة null
       orderId: map['order_id']?.toString() ?? '',
       status: status,
       scanTimestamp: DateTime.fromMillisecondsSinceEpoch(
-        map['scan_timestamp'] ?? DateTime.now().millisecondsSinceEpoch,
+        DateTime.now().millisecondsSinceEpoch,
       ),
       isDone: map['is_done'] == 1,
       buildingNumber: map['building_number']?.toString() ?? '',
@@ -132,8 +132,8 @@ class Address {
       country: map['country']?.toString() ?? '',
       fullAddress:
           map['full_address']?.toString() ?? '', // تم تصحيح الخطأ الإملائي
-      lat: (map['lat'] as num).toDouble(),
-      lng: (map['lng'] as num).toDouble(),
+      lat: (map['lat'])?.toDouble() ?? 0.0,
+      lng: (map['lng'])?.toDouble() ?? 0.0,
     );
   }
 

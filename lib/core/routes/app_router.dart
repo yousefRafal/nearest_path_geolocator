@@ -9,6 +9,7 @@ import 'package:test_geolocator_android/features/home/logic/qr_scan_cubit/qr_sca
 import 'package:test_geolocator_android/features/home/ui/home_page_o.dart';
 import 'package:test_geolocator_android/features/home/ui/map_screen.dart';
 import 'package:test_geolocator_android/features/home/ui/files_address_page.dart';
+import 'package:test_geolocator_android/features/home/ui/tcp_routes_page.dart';
 import 'package:test_geolocator_android/features/home/ui/widgets/scanner_page.dart';
 
 import '../../features/home/logic/bottom_navigation/bottom_navigation_cubit.dart';
@@ -30,7 +31,7 @@ class AppRouter {
                     create:
                         (_) =>
                             AddressBloc(DatabaseHelper())
-                              ..add(ShowFiledAddressing((9))),
+                              ..add(ShowFiledAddressing(fileId: null)),
                   ),
                   Provider<QrScanCubit>(
                     create: (_) => QrScanCubit()..initQrScan(),
@@ -43,10 +44,19 @@ class AppRouter {
       //   return MaterialPageRoute(builder: (context) => const LoginPage());
       case Routes.barcodeScanner:
         return CustomPageRoute(
-          child: Provider<QrScanCubit>(
-            create: (_) => QrScanCubit()..initQrScan(),
+          child: MultiProvider(
+            providers: [
+              Provider<AddressBloc>(
+                create:
+                    (_) =>
+                        AddressBloc(DatabaseHelper())
+                          ..add(ShowFiledAddressing(fileId: null)),
+              ),
+              Provider<QrScanCubit>(create: (_) => QrScanCubit()..initQrScan()),
+            ],
             child: const QRSearchOrderPage(),
           ),
+
           routeType: RouteType.slideAndScale,
           slideBeginOffset: const Offset(0.0, 1.0), // انزلاق من الأسفل
           // builder: (context) => Provider<QrScanCubit>(
@@ -80,6 +90,19 @@ class AppRouter {
             child: ScannerScreen(fileId: settings.arguments as int),
           ),
           routeType: RouteType.slideAndScale,
+          slideBeginOffset: const Offset(0.0, 1.0),
+        );
+
+      case Routes.mapScreen:
+        return CustomPageRoute(
+          child: BlocProvider(
+            create:
+                (context) => AddressBloc(
+                  DatabaseHelper(),
+                )..add(ShowFiledAddressing(fileId: settings.arguments as int?)),
+            child: MapScreen(fileId: settings.arguments as int),
+          ),
+          routeType: RouteType.slideAndScale,
           slideBeginOffset: const Offset(0.0, 1.0), // انزلاق من الأسفل
           // builder: (context) => Provider<QrScanCubit>(
           //   create: (_) => QrScanCubit()..initQrScan(),
@@ -87,14 +110,14 @@ class AppRouter {
           // ),
         );
 
-      case Routes.mapScreen:
+      case Routes.tcpRoutes:
         return CustomPageRoute(
           child: BlocProvider(
             create:
-                (context) =>
-                    AddressBloc(DatabaseHelper())
-                      ..add(ShowFiledAddressing(settings.arguments as int)),
-            child: MapScreen(fileId: settings.arguments as int),
+                (context) => AddressBloc(
+                  DatabaseHelper(),
+                )..add(ShowFiledAddressing(fileId: settings.arguments as int?)),
+            child: TcpRoutesPage(fileId: settings.arguments as int?),
           ),
           routeType: RouteType.slideAndScale,
           slideBeginOffset: const Offset(0.0, 1.0), // انزلاق من الأسفل

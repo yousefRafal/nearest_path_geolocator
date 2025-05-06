@@ -31,7 +31,7 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
-    _routeService = OptimizedRouteService('yah');
+    _routeService = OptimizedRouteService('');
     _getCurrentLocation();
   }
 

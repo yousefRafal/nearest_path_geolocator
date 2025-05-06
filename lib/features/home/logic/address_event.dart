@@ -55,10 +55,10 @@ class MarkAddressAsDone extends AddressEvent {
 }
 
 class ShowFiledAddressing extends AddressEvent {
-  final int fileId;
-  ShowFiledAddressing(this.fileId);
+  final int? fileId;
+  ShowFiledAddressing({this.fileId});
   @override
-  List<Object> get props => [fileId];
+  List<Object> get props => [fileId ?? 0];
 }
 
 class UpdateAddressStatus extends AddressEvent {

@@ -158,6 +158,7 @@ class DatabaseHelper {
       where: 'file_id = ?',
       whereArgs: [fileId],
     );
+
     return List.generate(maps.length, (i) => Address.fromMap(maps[i]));
   }
 
@@ -245,7 +246,7 @@ class DatabaseHelper {
   }
 
   Future<int> getOrCreateTodayFile({DateTime? date}) async {
-    final db = await this.database;
+    final db = await database;
 
     final formattedDate = DateFormat.yMMMMd(
       'ar',
@@ -265,11 +266,21 @@ class DatabaseHelper {
     }
 
     // إذا لم يكن موجوداً، أنشئ ملفاً جديداً
-    final newFileId = await db.insert('address_files', {
-      'name': DateFormat.yMMMMd('ar').format(date ?? DateTime.now()),
-      'date': date ?? DateTime.now(),
+    final newFileId = await db.insert('address_files', <String, dynamic>{
+      'name': formattedDate,
+      'date': (date ?? DateTime.now()).toIso8601String().toString(),
     });
 
     return newFileId;
+  }
+
+  Future<void> updateAddress(Address address) async {
+    final db = await database;
+    await db.update(
+      'addresses',
+      where: 'id = ?',
+      whereArgs: [address.id],
+      address.toMap(),
+    );
   }
 }

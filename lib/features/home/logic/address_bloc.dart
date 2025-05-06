@@ -118,9 +118,22 @@ class AddressBloc extends Bloc<AddressEvent, AddressState> {
   ) async {
     try {
       emit(AddressLoading());
-      await _databaseHelper.getAddressesForFile(event.fileId).then((value) {
-        emit(AddressFileLoaded(value));
-      });
+      if (event.fileId == null) {
+        final fileId = await _databaseHelper.getOrCreateTodayFile(
+          date: DateTime.now(),
+        );
+        await _databaseHelper.getAddressesForFile(fileId).then((value) {
+          emit(AddressFileLoaded(value, fileId: fileId));
+        });
+      } else {
+        print('event ${event.fileId}');
+        await _databaseHelper.getAddressesForFile(event.fileId!).then((value) {
+          print(
+            '========================  ${value.map((toElement) => toElement.toJson())}',
+          );
+          emit(AddressFileLoaded(value, fileId: event.fileId!));
+        });
+      }
     } catch (e) {
       emit(AddressError(e.toString()));
     }
